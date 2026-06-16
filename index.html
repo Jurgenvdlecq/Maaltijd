@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wat eten we?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1C1917;
+    --surface: #28211E;
+    --card: #322820;
+    --border: #3D2F28;
+    --accent: #E07B39;
+    --accent-dim: #7A3D18;
+    --accent-light: #FDF0E6;
+    --text: #F5EDE6;
+    --muted: #9C8070;
+    --green: #6BAF7A;
+    --red: #D95F5F;
+    --radius: 16px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* Header */
+  .hero {
+    background: linear-gradient(160deg, #3B2215 0%, #1C1917 60%);
+    padding: 40px 20px 32px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  .hero-title span { color: var(--accent); font-style: italic; }
+
+  .hero-sub {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .personen-toggle {
+    display: inline-flex;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 4px;
+    margin-top: 18px;
+  }
+
+  .personen-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 99px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .personen-btn.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 14px 8px;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .main { max-width: 560px; margin: 0 auto; padding: 20px 16px; }
+
+  /* Voorkeuren */
+  .pref-section { margin-bottom: 24px; }
+
+  .pref-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .pref-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pref-chip {
+    padding: 8px 14px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pref-chip.selected {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent-light);
+  }
+
+  .pref-chip.dislike {
+    background: #3D1515;
+    border-color: var(--red);
+    color: #F5A0A0;
+  }
+
+  /* Custom input */
+  .custom-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    outline: none;
+  }
+
+  input[type="text"]::placeholder { color: var(--muted); }
+  input[type="text"]:focus { border-color: var(--accent); }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #c96d2e; }
+  .btn-primary:disabled { background: var(--accent-dim); color: var(--muted); cursor: not-allowed; }
+  .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-sm { font-size: 12px; padding: 7px 14px; border-radius: 8px; }
+
+  /* Suggestie kaart */
+  .suggestion-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .suggestion-header {
+    padding: 20px 20px 0;
+  }
+
+  .suggestion-keuken {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .suggestion-naam {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .suggestion-meta {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .meta-pill {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .suggestion-body { padding: 16px 20px 20px; }
+
+  .suggestion-omschrijving {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .ingredienten-titel {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .ingredienten-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .ingredient-item {
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ingredient-item::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .suggestion-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 20px;
+    flex-wrap: wrap;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Geschiedenis */
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .history-naam {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .history-date { font-size: 12px; color: var(--muted); }
+
+  .rating-badge {
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-weight: 600;
+  }
+
+  .rating-lekker { background: #1A3D22; color: var(--green); }
+  .rating-meh { background: #2D2415; color: #C5A050; }
+  .rating-niet { background: #3D1515; color: var(--red); }
+
+  /* Empty */
+  .empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  .generate-btn-wrap {
+    position: sticky;
+    bottom: 20px;
+    padding: 0 0 4px;
+    z-index: 10;
+  }
+
+  .generate-btn-wrap .btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(224,123,57,0.35);
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--green);
+    color: #0A2010;
+    padding: 12px 20px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform 0.3s ease;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1 class="hero-title">Wat eten we <span>vanavond?</span></h1>
+  <p class="hero-sub">Gebaseerd op wat jij lekker vindt</p>
+  <div class="personen-toggle">
+    <button class="personen-btn active" onclick="setPersonen(2, this)">👤 2 personen</button>
+    <button class="personen-btn" onclick="setPersonen(4, this)">👥 4 personen</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('suggestie', this)">🍽 Suggestie</button>
+  <button class="tab" onclick="switchTab('voorkeuren', this)">❤️ Voorkeuren</button>
+  <button class="tab" onclick="switchTab('geschiedenis', this)">📋 Geschiedenis</button>
+</div>
+
+<!-- TAB: SUGGESTIE -->
+<div id="tab-suggestie" class="tab-section active">
+  <div class="main">
+    <div id="suggestie-container">
+      <div class="empty">
+        <div class="empty-icon">🍳</div>
+        <p>Druk op de knop hieronder<br>voor een maaltijdsuggestie!</p>
+      </div>
+    </div>
+    <div class="generate-btn-wrap">
+      <button class="btn btn-primary" id="gen-btn" onclick="genereerSuggestie()">✨ Geef mij een idee</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: VOORKEUREN -->
+<div id="tab-voorkeuren" class="tab-section">
+  <div class="main">
+
+    <div class="pref-section">
+      <div class="pref-label">🍝 Keuken / stijl — wat vind je lekker?</div>
+      <div class="pref-grid" id="keuken-grid"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="pref-section">
+      <div class="pref-label">🥩 Eiwitten — wat eet je graag?</div>
+      <div class="pref-grid" id="eiwit-grid"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="pref-section">
+      <div class="pref-label">🚫 Wat eet je liever niet?</div>
+      <div class="pref-grid" id="vermijd-grid"></div>
+      <div class="custom-row" style="margin-top:12px">
+        <input type="text" id="custom-vermijd" placeholder="Iets anders toevoegen...">
+        <button class="btn btn-ghost btn-sm" onclick="addCustomVermijd()">+ Toevoegen</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="pref-section">
+      <div class="pref-label">⏱ Hoeveel tijd heb je?</div>
+      <div class="pref-grid" id="tijd-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TAB: GESCHIEDENIS -->
+<div id="tab-geschiedenis" class="tab-section">
+  <div class="main">
+    <div id="geschiedenis-container">
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        <p>Nog geen maaltijden beoordeeld.<br>Genereer een suggestie en geef aan of je het lekker vond!</p>
+      </div>
+    </div>
+    <div style="margin-top:16px; text-align:right">
+      <button class="btn btn-ghost btn-sm" onclick="clearGeschiedenis()">🗑 Geschiedenis wissen</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEUKEN_OPTIES = ['Italiaans 🍕','Nederlands 🥔','Aziatisch 🍜','Mexicaans 🌮','Grieks 🫒','Indiaas 🍛','Amerikaans 🍔','Frans 🥐','Japans 🍣','Midden-Oosten 🧆'];
+const EIWIT_OPTIES = ['Kip 🐓','Rund 🥩','Varken 🐷','Lam 🐑','Gehakt 🫕','Tofu 🟡','Eieren 🥚','Vegetarisch 🥦'];
+const VERMIJD_OPTIES = ['Vis 🐟','Noten 🥜','Gluten 🌾','Lactose 🥛','Pittig 🌶️','Rauwe ui 🧅'];
+const TIJD_OPTIES = ['Snel (< 20 min) ⚡','Normaal (30–45 min) 🕐','Mag langer (60 min+) 🍲'];
+
+let personen = 2;
+let prefs = JSON.parse(localStorage.getItem('maaltijd-prefs') || '{"keuken":[],"eiwit":[],"vermijd":[],"tijd":["Normaal (30–45 min) 🕐"]}');
+let geschiedenis = JSON.parse(localStorage.getItem('maaltijd-geschiedenis') || '[]');
+let huidigeSuggestie = null;
+
+function savePrefs() { localStorage.setItem('maaltijd-prefs', JSON.stringify(prefs)); }
+function saveGeschiedenis() { localStorage.setItem('maaltijd-geschiedenis', JSON.stringify(geschiedenis)); }
+
+function setPersonen(n, btn) {
+  personen = n;
+  document.querySelectorAll('.personen-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'geschiedenis') renderGeschiedenis();
+}
+
+function renderChips(containerId, opties, prefKey, isVermijd = false) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = opties.map(opt => {
+    const sel = prefs[prefKey].includes(opt);
+    const cls = sel ? (isVermijd ? 'dislike' : 'selected') : '';
+    return `<div class="pref-chip ${cls}" onclick="togglePref('${prefKey}', '${opt}', ${isVermijd}, this)">${opt}</div>`;
+  }).join('');
+}
+
+function togglePref(key, val, isVermijd, el) {
+  const idx = prefs[key].indexOf(val);
+  if (idx === -1) {
+    prefs[key].push(val);
+    el.classList.add(isVermijd ? 'dislike' : 'selected');
+  } else {
+    prefs[key].splice(idx, 1);
+    el.classList.remove('selected', 'dislike');
+  }
+  savePrefs();
+}
+
+function addCustomVermijd() {
+  const input = document.getElementById('custom-vermijd');
+  const val = input.value.trim();
+  if (!val || VERMIJD_OPTIES.includes(val)) { input.focus(); return; }
+  VERMIJD_OPTIES.push(val);
+  prefs.vermijd.push(val);
+  savePrefs();
+  renderChips('vermijd-grid', VERMIJD_OPTIES, 'vermijd', true);
+  input.value = '';
+}
+
+function renderGeschiedenis() {
+  const el = document.getElementById('geschiedenis-container');
+  if (geschiedenis.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><p>Nog geen maaltijden beoordeeld.<br>Genereer een suggestie en geef aan of je het lekker vond!</p></div>`;
+    return;
+  }
+  el.innerHTML = [...geschiedenis].reverse().map(item => `
+    <div class="history-item">
+      <div style="flex:1">
+        <div class="history-naam">${item.naam}</div>
+        <div class="history-date">${item.datum} · ${item.personen} personen</div>
+      </div>
+      <span class="rating-badge ${item.rating === 'lekker' ? 'rating-lekker' : item.rating === 'meh' ? 'rating-meh' : 'rating-niet'}">
+        ${item.rating === 'lekker' ? '👍 Lekker' : item.rating === 'meh' ? '😐 Gaat wel' : '👎 Niet lekker'}
+      </span>
+    </div>
+  `).join('');
+}
+
+function clearGeschiedenis() {
+  if (confirm('Geschiedenis wissen?')) { geschiedenis = []; saveGeschiedenis(); renderGeschiedenis(); }
+}
+
+function beoordeel(rating) {
+  if (!huidigeSuggestie) return;
+  const nu = new Date();
+  geschiedenis.push({
+    naam: huidigeSuggestie,
+    rating,
+    personen,
+    datum: nu.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
+  });
+  saveGeschiedenis();
+  showToast(rating === 'lekker' ? '👍 Opgeslagen als lekker!' : rating === 'meh' ? '😐 Opgeslagen!' : '👎 Opgeslagen — volgende keer beter!');
+  document.querySelector('.suggestion-actions').innerHTML = `<span style="color:var(--muted);font-size:13px">✓ Beoordeling opgeslagen</span>`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function genereerSuggestie() {
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Even denken...';
+
+  document.getElementById('suggestie-container').innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Ik bedenk iets lekkers voor je...</p>
+    </div>`;
+
+  const geliefdeKeuken = prefs.keuken.length > 0 ? prefs.keuken.join(', ') : 'alles';
+  const geliefdEiwit = prefs.eiwit.length > 0 ? prefs.eiwit.join(', ') : 'alles';
+  const vermijd = prefs.vermijd.length > 0 ? prefs.vermijd.join(', ') : 'niets';
+  const tijd = prefs.tijd.length > 0 ? prefs.tijd[0] : 'Normaal (30–45 min)';
+  const gehistorie = geschiedenis.length > 0
+    ? 'Recentelijk at ik: ' + [...geschiedenis].slice(-5).map(h => h.naam + ' (' + (h.rating === 'lekker' ? 'lekker' : h.rating === 'meh' ? 'gaat wel' : 'niet lekker') + ')').join(', ') + '.'
+    : '';
+
+  const prompt = `Je bent een vriendelijke Nederlandse kookassistent. Geef één concrete maaltijdsuggestie voor ${personen} personen.
+
+Voorkeuren:
+- Favoriete keukens: ${geliefdeKeuken}
+- Favoriete eiwitten: ${geliefdEiwit}
+- Vermijden: ${vermijd}
+- Beschikbare tijd: ${tijd}
+${gehistorie}
+
+Geef een gevarieerde suggestie die past bij de voorkeuren. Reageer ALLEEN met een JSON object (geen markdown, geen uitleg erbuiten), in dit exacte formaat:
+{
+  "naam": "Naam van het gerecht",
+  "keuken": "Type keuken",
+  "tijd": "bijv. 35 minuten",
+  "moeilijkheid": "Makkelijk / Gemiddeld / Uitdagend",
+  "omschrijving": "Korte smakelijke beschrijving van 1-2 zinnen",
+  "ingredienten": ["ingredient 1 met hoeveelheid voor ${personen} personen", "ingredient 2", "ingredient 3", "ingredient 4", "ingredient 5", "ingredient 6"]
+}`;
+
+  try {
+    const GEMINI_KEY = localStorage.getItem("gemini-key");
+    if (!GEMINI_KEY) { toonSleutelScherm(); btn.disabled = false; btn.textContent = "✨ Geef mij een idee"; return; }
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.9, maxOutputTokens: 1000 }
+      })
+    });
+
+    const data = await response.json();
+    const text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').replace(/```json|```/g, '').trim();
+    const meal = JSON.parse(text);
+    huidigeSuggestie = meal.naam;
+    renderSuggestie(meal);
+
+  } catch (err) {
+    document.getElementById('suggestie-container').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">😕</div>
+        <p>Er ging iets mis. Probeer het opnieuw!</p>
+      </div>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔄 Ander idee';
+}
+
+function renderSuggestie(meal) {
+  document.getElementById('suggestie-container').innerHTML = `
+    <div class="suggestion-card">
+      <div class="suggestion-header">
+        <div class="suggestion-keuken">${meal.keuken}</div>
+        <div class="suggestion-naam">${meal.naam}</div>
+        <div class="suggestion-meta">
+          <span class="meta-pill">⏱ ${meal.tijd}</span>
+          <span class="meta-pill">👤 ${personen} personen</span>
+          <span class="meta-pill">📊 ${meal.moeilijkheid}</span>
+        </div>
+      </div>
+      <div class="suggestion-body">
+        <p class="suggestion-omschrijving">${meal.omschrijving}</p>
+        <div class="ingredienten-titel">Ingrediënten</div>
+        <div class="ingredienten-grid">
+          ${meal.ingredienten.map(i => `<div class="ingredient-item">${i}</div>`).join('')}
+        </div>
+      </div>
+      <div class="suggestion-actions">
+        <button class="btn btn-ghost btn-sm" onclick="beoordeel('lekker')">👍 Lekker!</button>
+        <button class="btn btn-ghost btn-sm" onclick="beoordeel('meh')">😐 Gaat wel</button>
+        <button class="btn btn-ghost btn-sm" onclick="beoordeel('niet')">👎 Niet voor mij</button>
+      </div>
+    </div>
+  `;
+}
+
+function toonSleutelScherm() {
+  document.getElementById('suggestie-container').innerHTML = `
+    <div class="suggestion-card" style="padding:24px">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:36px;margin-bottom:10px">🔑</div>
+        <div style="font-family:'Fraunces',serif;font-size:22px;margin-bottom:8px">API sleutel instellen</div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.6">Voer je Gemini API sleutel in om de app te gebruiken.<br>Hij wordt alleen op jouw telefoon opgeslagen.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <input type="password" id="key-input" placeholder="Plak hier je Gemini API sleutel..." style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none">
+        <button class="btn btn-primary" onclick="slaSleutelOp()" style="width:100%;padding:14px">✓ Opslaan & doorgaan</button>
+        <p style="color:var(--muted);font-size:11px;text-align:center">Sleutel ophalen via <strong>aistudio.google.com</strong> → Get API key</p>
+      </div>
+    </div>`;
+}
+
+function slaSleutelOp() {
+  const key = document.getElementById('key-input').value.trim();
+  if (!key) return;
+  localStorage.setItem('gemini-key', key);
+  document.getElementById('suggestie-container').innerHTML = `<div class="empty"><div class="empty-icon">✅</div><p>Sleutel opgeslagen!<br>Druk op de knop voor je eerste suggestie.</p></div>`;
+}
+
+// Init
+renderChips('keuken-grid', KEUKEN_OPTIES, 'keuken');
+renderChips('eiwit-grid', EIWIT_OPTIES, 'eiwit');
+renderChips('vermijd-grid', VERMIJD_OPTIES, 'vermijd', true);
+renderChips('tijd-grid', TIJD_OPTIES, 'tijd');
+
+// Toon sleutelscherm als er nog geen sleutel is
+if (!localStorage.getItem('gemini-key')) { toonSleutelScherm(); }
+</script>
+</body>
+</html>
